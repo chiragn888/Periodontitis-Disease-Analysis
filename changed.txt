@@ -1,0 +1,94 @@
+***app.py***
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+import pymongo
+from sklearn.linear_model import LogisticRegression
+import numpy as np 
+
+app = FastAPI()
+
+# Defining the model
+class Data(BaseModel):
+    tooth_loss: float
+    radiographic_bone_loss: float
+    clinical_attachment_loss: float
+    pocket_probing_depth: float
+
+# Establish a connection to the MongoDB
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+# Create a database
+db = client["predictionDB"]
+col = db["predictions"]
+
+@app.post('/predict')
+async def predict_gravity(data: Data):
+    
+    # Load the Model
+    model2= LogisticRegression()
+
+    # predict the output
+    data_array = np.array([data.tooth_loss,data.radiographic_bone_loss,data.clinical_attachment_loss,data.pocket_probing_depth]).reshape(1,-1)
+    prediction = model2.predict(data_array)
+
+    # Storing the prediction to the DB
+    res = {'tooth_loss': data.tooth_loss, 'radiographic_bone_loss': data.radiographic_bone_loss, 'clinical_attachment_loss': data.clinical_attachment_loss, 'pocket_probing_depth': data.pocket_probing_depth, 'prediction': prediction[0]}
+    x = col.insert_one(res)
+
+    # Return response
+    return {"prediction": prediction[0]}
+
+    
+@app.get('/')
+def read_root(data:Data):
+    return {"Hello": "World"}
+```
+
+***index.html***
+
+Create this HTML file to get user inputs, send it to API and display response from it.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Page</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.3/axios.min.js"></script>
+</head>
+<body>
+    <form id="gravityForm">
+        Tooth Loss: <input type="text" id="tooth_loss"><br>
+        Radiographic Bone Loss: <input type="text" id="radiographic_bone_loss"><br>
+        Clinical Attachment Loss: <input type="text" id="clinical_attachment_loss"><br>
+        Pocket Probing Depth: <input type="text" id="pocket_probing_depth"><br>
+        <input type="submit" value="Predict">
+    </form>
+
+    <p id="prediction"></p>
+
+    <script>
+        document.getElementById('gravityForm').addEventListener('submit', async function(e) {
+            e.preventDefault()
+
+            let tooth_loss = document.getElementById('tooth_loss').value
+            let radiographic_bone_loss = document.getElementById('radiographic_bone_loss').value
+            let clinical_attachment_loss = document.getElementById('clinical_attachment_loss').value
+            let pocket_probing_depth = document.getElementById('pocket_probing_depth').value
+            
+            let res = await axios.post('http://localhost:8000/predict', {
+                tooth_loss: tooth_loss,
+                radiographic_bone_loss: radiographic_bone_loss,
+                clinical_attachment_loss: clinical_attachment_loss,
+                pocket_probing_depth: pocket_probing_depth
+            })
+
+            document.getElementById('prediction').innerText = 'Prediction: ' + res.data.prediction
+        })
+    </script>
+</body>
+</html>
+```
+To run the FastAPI server we use the command `uvicorn app:app --reload`
+
+To get the HTML page we use any HTTP server like using the command `python -m http.server`. This command should be in the directory where index.html file exists and then we can open the browser and navigate to http://localhost:8000/index.html to see the prediction form.
