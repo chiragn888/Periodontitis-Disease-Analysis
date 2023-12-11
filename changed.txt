@@ -1,0 +1,39 @@
+Here is the code to create a FastAPI:
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
+
+app = FastAPI()
+
+class Dental(BaseModel):
+    HbA1c: str
+    number_of_cigarettes: str
+
+@app.on_event("startup")
+async def load_model():
+    global model
+    model = XGBClassifier()
+
+@app.post('/predict')
+async def predict(data: Dental):
+    data = data.dict()
+    data['HbA1c'] = data['HbA1c'].map({
+        '>7g%':2,
+        'normoglycemic':0,
+        '<7g%':1
+    })
+    data['NUMBER OF CIGGARETTES'] = data['NUMBER OF CIGGARETTES'].map({
+        '0':0,
+        '>10':2,
+        '<10':1
+    })
+    prediction = model.predict(np.array([list(data.values())]))
+    return {'prediction': prediction[0]}
+```
+
+This FastAPI will wait for incoming POST requests to the '/predict' endpoint, and when it receives a request, it will apply the model to the sent data and return prediction based on the features provided by user. This model here uses the XGBClassifier for predictions. Note that the model is not trained in the example, and would generally be trained before deployment. Example also assumes that the trained model is available in the file's directory or is accessible to the FastAPI instance.
