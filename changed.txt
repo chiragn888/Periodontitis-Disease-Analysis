@@ -1,0 +1,48 @@
+***app.py***
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class Item(BaseModel):
+    tooth_loss: int
+    radiographic_bone_loss: int
+    clinical_attachment_loss: int
+    pocket_probing_depth: int
+
+
+@app.post("/predict")
+async def predict_grade(item: Item):
+    data = pd.DataFrame([dict(item)])
+    
+    # Insert your model prediction code here, assuming model2 as the existing model
+    prediction = model2.predict(data)
+    
+    return {"Predicted Grade": int(prediction)}
+```
+
+***index.html***
+```html
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Predict Grade</h2>
+
+<form action="/predict" method="POST">
+  <label for="tooth_loss">Tooth Loss:</label><br>
+  <input type="number" id="tooth_loss" name="tooth_loss"><br>
+  <label for="radiographic_bone_loss">Radiographic Bone Loss:</label><br>
+  <input type="number" id="radiographic_bone_loss" name="radiographic_bone_loss"><br>
+  <label for="clinical_attachment_loss">Clinical Attachment Loss:</label><br>
+  <input type="number" id="clinical_attachment_loss" name="clinical_attachment_loss"><br>
+  <label for="pocket_probing_depth">Pocket Probing Depth:</label><br>
+  <input type="number" id="pocket_probing_depth" name="pocket_probing_depth"><br>
+  <input type="submit" value="Submit">  
+</form> 
+
+</body>
+</html>
+```
