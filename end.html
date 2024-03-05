@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>home page</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="index.html">
+</head>
+<body>
+<center>
+    <h1 style="font-size: 40px;font-family:'.AppleSystemUIFont';margin-top: 100px">Hi this is home page</h1>
+    <h2 style="font-size: 20px; color:green; font-weight:bold;">You are on the home page</h2>
+    <div id="border">
+        <br><br>
+    <button id="logout" class="button">sign out</button>
+    </div>
+</center>
+
+<script type="module">
+     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-analytics.js";
+  import { signInWithEmailAndPassword, GoogleAuthProvider, getAuth, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.6/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB9jArkUdlcipS-LHJRNSD4hergddW-XRw",
+  authDomain: "new-firebase-b4a29.firebaseapp.com",
+  projectId: "new-firebase-b4a29",
+  storageBucket: "new-firebase-b4a29.appspot.com",
+  messagingSenderId: "318345862940",
+  appId: "1:318345862940:web:8c1f0d6ae6da3c7754a4d9",
+  measurementId: "G-F7GMN64KLE"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+
+   document.getElementById('logout').addEventListener('click',function (){
+         signOut(auth).then(() => {
+          window.alert('Logged out sucessfully!');
+          location.replace('index.html')
+        }).catch((error) => {
+          console.log(error.message);
+        });
+    });
+
+</script>
+</body>
+</html>
